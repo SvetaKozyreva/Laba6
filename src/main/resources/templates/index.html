@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TodoMVC - Laba6</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/todomvc-common@1.0.5/base.min.css">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/todomvc-app-css@2.4.1/index.css">
+</head>
+
+<body>
+
+<section class="todoapp">
+
+    <header class="header">
+        <h1>todos</h1>
+
+        <form th:action="@{/}" th:object="${newTodo}" method="post">
+
+            <input class="new-todo"
+                   placeholder="What needs to be done?"
+                   th:field="*{title}"
+                   autofocus>
+
+            <p th:if="${#fields.hasErrors('title')}"
+               th:errors="*{title}">
+            </p>
+
+        </form>
+    </header>
+
+    <section class="main" th:if="${!todoItems.isEmpty()}">
+
+        <ul class="todo-list">
+
+            <li th:each="todo : ${todoItems}"
+                th:classappend="${todo.completed} ? 'completed' : ''">
+
+                <div class="view">
+
+                    <input class="toggle"
+                           type="checkbox"
+                           th:checked="${todo.completed}"
+                           th:attr="data-url=@{/toggle/{id}(id=${todo.id})}"
+                           onchange="fetch(this.dataset.url, {method: 'POST'})
+               .then(() => location.reload())">
+
+                    <label th:text="${todo.title}">
+                        Название задачи
+                    </label>
+
+                    <!-- Удаление задачи -->
+                    <form th:action="@{/delete/{id}(id=${todo.id})}"
+                          method="post">
+
+                        <button class="destroy" type="submit"></button>
+
+                    </form>
+
+                </div>
+
+            </li>
+
+        </ul>
+
+    </section>
+
+    <footer class="footer" th:if="${!todoItems.isEmpty()}">
+
+        <span class="todo-count">
+            <strong th:text="${activeCount}">0</strong>
+            items left
+        </span>
+
+
+        <ul class="filters">
+
+            <li>
+                <a th:href="@{/(filter='all')}"
+                   th:classappend="${filter == 'all'} ? 'selected' : ''">
+                    All
+                </a>
+            </li>
+
+            <li>
+                <a th:href="@{/(filter='active')}"
+                   th:classappend="${filter == 'active'} ? 'selected' : ''">
+                    Active
+                </a>
+            </li>
+
+            <li>
+                <a th:href="@{/(filter='completed')}"
+                   th:classappend="${filter == 'completed'} ? 'selected' : ''">
+                    Completed
+                </a>
+            </li>
+
+        </ul>
+
+
+    </footer>
+
+</section>
+
+<footer class="info">
+    <p>Double-click to edit a todo</p>
+    <p>Created for Laba6</p>
+    <p>Part of TodoMVC</p>
+</footer>
+
+</body>
+</html>
