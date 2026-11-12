@@ -1,3 +1,4 @@
+
 package com.example.Laba6.todoitem.web;
 
 import com.example.Laba6.todoitem.TodoItem;
@@ -21,14 +22,12 @@ public class TodoItemController {
     }
 
     // Отображение главной страницы
-
     @GetMapping
     public String index(
             @RequestParam(defaultValue = "all") String filter,
             Model model) {
 
         List<TodoItem> allItems = todoItemRepository.findAll();
-
         List<TodoItem> todoItems;
 
         // Выбираем задачи в зависимости от фильтра
@@ -63,7 +62,6 @@ public class TodoItemController {
         return "index";
     }
 
-
     // Добавление новой задачи
     @PostMapping
     public String addTodo(
@@ -72,15 +70,15 @@ public class TodoItemController {
             Model model) {
 
         if (bindingResult.hasErrors()) {
+            List<TodoItem> allItems = todoItemRepository.findAll();
 
-            List<TodoItem> todoItems = todoItemRepository.findAll();
-
-            long activeCount = todoItems.stream()
+            long activeCount = allItems.stream()
                     .filter(item -> !item.isCompleted())
                     .count();
 
-            model.addAttribute("todoItems", todoItems);
+            model.addAttribute("todoItems", allItems);
             model.addAttribute("activeCount", activeCount);
+            model.addAttribute("filter", "all");
 
             return "index";
         }
@@ -92,21 +90,21 @@ public class TodoItemController {
     }
 
     // Изменение статуса задачи
-    @PostMapping("/toggle/{id}")
+    @PutMapping("/toggle/{id}")
     public String toggleTodo(@PathVariable Long id) {
 
         TodoItem todoItem = todoItemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Задача не найдена"));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Задача не найдена"));
 
         todoItem.setCompleted(!todoItem.isCompleted());
-
         todoItemRepository.save(todoItem);
 
         return "redirect:/";
     }
 
     // Удаление задачи
-    @PostMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public String deleteTodo(@PathVariable Long id) {
 
         todoItemRepository.deleteById(id);

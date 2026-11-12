@@ -48,8 +48,9 @@
                            type="checkbox"
                            th:checked="${todo.completed}"
                            th:attr="data-url=@{/toggle/{id}(id=${todo.id})}"
-                           onchange="fetch(this.dataset.url, {method: 'POST'})
-               .then(() => location.reload())">
+                           onchange="fetch(this.dataset.url, {
+                               method: 'PUT'
+                           }).then(() => location.reload())">
 
                     <label th:text="${todo.title}">
                         Название задачи
@@ -58,6 +59,8 @@
                     <!-- Удаление задачи -->
                     <form th:action="@{/delete/{id}(id=${todo.id})}"
                           method="post">
+
+                        <input type="hidden" name="_method" value="delete">
 
                         <button class="destroy" type="submit"></button>
 
