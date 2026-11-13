@@ -37,6 +37,15 @@
 
     <section class="main" th:if="${!todoItems.isEmpty()}">
 
+        <!-- Отметка всех задач как выполненных -->
+        <form th:action="@{/toggle-all}" th:method="put">
+            <input id="toggle-all"
+                   class="toggle-all"
+                   type="checkbox"
+                   onclick="this.form.submit()">
+            <label for="toggle-all">Mark all as complete</label>
+        </form>
+
         <ul class="todo-list">
 
             <li th:each="todo : ${todoItems}"
@@ -74,7 +83,8 @@
 
     </section>
 
-    <footer class="footer" th:if="${!todoItems.isEmpty()}">
+    <footer class="footer"
+            th:if="${!todoItems.isEmpty() or completedCount > 0}">
 
         <span class="todo-count">
             <strong th:text="${activeCount}">0</strong>
@@ -107,7 +117,13 @@
 
         </ul>
 
-
+        <!-- Удаление всех выполненных задач -->
+        <form th:action="@{/completed}" th:method="delete"
+              th:if="${completedCount > 0}">
+            <button class="clear-completed" type="submit">
+                Clear completed
+            </button>
+        </form>
     </footer>
 
 </section>

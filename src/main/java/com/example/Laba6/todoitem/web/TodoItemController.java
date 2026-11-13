@@ -49,15 +49,7 @@ public class TodoItemController {
                 filter = "all";
         }
 
-        // Считаем количество невыполненных задач
-        long activeCount = allItems.stream()
-                .filter(item -> !item.isCompleted())
-                .count();
-
-        model.addAttribute("todoItems", todoItems);
-        model.addAttribute("activeCount", activeCount);
-        model.addAttribute("newTodo", new TodoItem());
-        model.addAttribute("filter", filter);
+        addAttributes(model, todoItems, allItems, filter);
 
         return "index";
     }
@@ -72,13 +64,7 @@ public class TodoItemController {
         if (bindingResult.hasErrors()) {
             List<TodoItem> allItems = todoItemRepository.findAll();
 
-            long activeCount = allItems.stream()
-                    .filter(item -> !item.isCompleted())
-                    .count();
-
-            model.addAttribute("todoItems", allItems);
-            model.addAttribute("activeCount", activeCount);
-            model.addAttribute("filter", "all");
+            addAttributes(model, allItems, allItems, "all");
 
             return "index";
         }
@@ -89,7 +75,7 @@ public class TodoItemController {
         return "redirect:/";
     }
 
-    // Изменение статуса задачи
+    // Изменение статуса одной задачи
     @PutMapping("/toggle/{id}")
     public String toggleTodo(@PathVariable Long id) {
 
@@ -103,11 +89,56 @@ public class TodoItemController {
         return "redirect:/";
     }
 
-    // Удаление задачи
+    // Удаление одной задачи
     @DeleteMapping("/delete/{id}")
     public String deleteTodo(@PathVariable Long id) {
 
         todoItemRepository.deleteById(id);
+
+        return "redirect:/";
+    }
+
+    // Подготовка данных для отображения страницы
+    private void addAttributes(
+            Model model,
+            List<TodoItem> todoItems,
+            List<TodoItem> allItems,
+            String filter) {
+
+        long activeCount = todoItemRepository.countAllByCompleted(false);
+        int completedCount = todoItemRepository.countAllByCompleted(true);
+
+        model.addAttribute("todoItems", todoItems);
+        model.addAttribute("activeCount", activeCount);
+        model.addAttribute("completedCount", completedCount);
+        model.addAttribute("newTodo", new TodoItem());
+        model.addAttribute("filter", filter);
+    }
+
+    // Удаление всех выполненных задач
+    @DeleteMapping("/completed")
+    public String deleteCompletedItems() {
+
+        List<TodoItem> completedItems =
+                todoItemRepository.findAllByCompleted(true);
+
+        for (TodoItem item : completedItems) {
+            todoItemRepository.deleteById(item.getId());
+        }
+
+        return "redirect:/";
+    }
+
+    // Изменение статуса всех задач
+    @PutMapping("/toggle-all")
+    public String toggleAll() {
+
+        List<TodoItem> todoItems = todoItemRepository.findAll();
+
+        for (TodoItem todoItem : todoItems) {
+            todoItem.setCompleted(!todoItem.isCompleted());
+            todoItemRepository.save(todoItem);
+        }
 
         return "redirect:/";
     }
